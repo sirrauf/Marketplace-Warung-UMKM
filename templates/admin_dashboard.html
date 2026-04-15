@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f4f4f4;
+      }
+      nav {
+        background: #2c3e50;
+        padding: 1rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      nav a {
+        color: white;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+      .container {
+        padding: 2rem;
+        max-width: 1100px;
+        margin: auto;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+      .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .stat-card .number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .stat-card .label {
+        color: #7f8c8d;
+        margin-top: 5px;
+      }
+      .stat-card.revenue .number {
+        color: #27ae60;
+      }
+      .stat-card.orders .number {
+        color: #3498db;
+      }
+      .stat-card.sellers .number {
+        color: #f39c12;
+      }
+      .stat-card.buyers .number {
+        color: #9b59b6;
+      }
+
+      h2 {
+        color: #2c3e50;
+        margin-top: 30px;
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      th {
+        background: #2c3e50;
+        color: white;
+        padding: 12px;
+        text-align: left;
+      }
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #eee;
+      }
+      tr:hover {
+        background: #f9f9f9;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+      .badge-active {
+        background: #d4edda;
+        color: #155724;
+      }
+      .badge-pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .btn {
+        padding: 6px 14px;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin: 2px;
+      }
+      .btn-approve {
+        background: #27ae60;
+      }
+      .btn-approve:hover {
+        background: #219a52;
+      }
+      .btn-reject {
+        background: #e74c3c;
+      }
+      .btn-reject:hover {
+        background: #c0392b;
+      }
+
+      .revenue-text {
+        color: #27ae60;
+        font-weight: bold;
+      }
+      .sub-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+      .sub-table th {
+        background: #34495e;
+        font-size: 0.85rem;
+        padding: 8px;
+      }
+      .sub-table td {
+        padding: 8px;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #eee;
+      }
+
+      details {
+        margin-bottom: 5px;
+      }
+      details summary {
+        cursor: pointer;
+        color: #3498db;
+        font-weight: bold;
+      }
+      details summary:hover {
+        text-decoration: underline;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 20px;
+        background: #333;
+        color: white;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div><strong>UMKM Online — Admin Panel</strong></div>
+      <div>
+        <a href="/">Beranda</a>
+        <a href="/admin">Dashboard</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </nav>
+    <div class="container">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <ul style="color: green">
+        {% for msg in messages %}
+        <li>{{ msg }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% endwith %}
+
+      <h1>📊 Admin Dashboard</h1>
+
+      <!-- Ringkasan Platform -->
+      <div class="stats-grid">
+        <div class="stat-card revenue">
+          <div class="number">Rp {{ "%.2f"|format(total_revenue) }}</div>
+          <div class="label">Total Pendapatan Platform</div>
+        </div>
+        <div class="stat-card orders">
+          <div class="number">{{ total_orders }}</div>
+          <div class="label">Total Pesanan</div>
+        </div>
+        <div class="stat-card sellers">
+          <div class="number">{{ total_sellers }}</div>
+          <div class="label">Total Penjual</div>
+        </div>
+        <div class="stat-card buyers">
+          <div class="number">{{ total_buyers }}</div>
+          <div class="label">Total Pembeli</div>
+        </div>
+      </div>
+
+      <!-- Kelola Penjual -->
+      <h2>🏪 Kelola Penjual & Keuntungan</h2>
+      <table>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Telepon</th>
+          <th>Status</th>
+          <th>Total Pesanan</th>
+          <th>Pendapatan</th>
+          <th>Aksi</th>
+        </tr>
+        {% for s in seller_data %}
+        <tr>
+          <td>{{ s.name }}</td>
+          <td>{{ s.email }}</td>
+          <td>{{ s.phone }}</td>
+          <td>
+            {% if s.is_verified %}
+            <span class="badge badge-active">Aktif</span>
+            {% else %}
+            <span class="badge badge-pending">Pending</span>
+            {% endif %}
+          </td>
+          <td>{{ s.total_orders }}</td>
+          <td class="revenue-text">Rp {{ "%.2f"|format(s.total_revenue) }}</td>
+          <td>
+            {% if not s.is_verified %}
+            <a href="/admin/approve/{{ s.id }}" class="btn btn-approve"
+              >✔ Approve</a
+            >
+            {% endif %} {% if s.is_verified %}
+            <a href="/admin/reject/{{ s.id }}" class="btn btn-reject"
+              >✖ Reject</a
+            >
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="7" style="padding: 5px 12px">
+            {% if s.products %}
+            <details>
+              <summary>Lihat Produk ({{ s.products|length }})</summary>
+              <table class="sub-table">
+                <tr>
+                  <th>Produk</th>
+                  <th>Harga</th>
+                  <th>Stok</th>
+                  <th>Terjual</th>
+                  <th>Jumlah Pembeli</th>
+                  <th>Pendapatan</th>
+                </tr>
+                {% for p in s.products %}
+                <tr>
+                  <td>{{ p.name }}</td>
+                  <td>Rp {{ "%.2f"|format(p.price) }}</td>
+                  <td>{{ p.stock }}</td>
+                  <td>{{ p.total_sold }}</td>
+                  <td>{{ p.buyer_count }}</td>
+                  <td class="revenue-text">
+                    Rp {{ "%.2f"|format(p.revenue) }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </table>
+            </details>
+            {% else %}
+            <em style="color: #999">Belum ada produk</em>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" style="text-align: center; color: #999">
+            Belum ada penjual terdaftar.
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+
+      <!-- Data Pembeli -->
+      <h2>👥 Data Pembeli</h2>
+      <table>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Telepon</th>
+          <th>Jumlah Pembelian</th>
+        </tr>
+        {% for b in buyer_data %}
+        <tr>
+          <td>{{ b.name }}</td>
+          <td>{{ b.email }}</td>
+          <td>{{ b.phone }}</td>
+          <td>{{ b.purchase_count }} item</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" style="text-align: center; color: #999">
+            Belum ada pembeli terdaftar.
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div class="footer">
+      <p>&copy; 2026 UMKM Online — Admin Panel. All rights reserved.</p>
+    </div>
+  </body>
+</html>

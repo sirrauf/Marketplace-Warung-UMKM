@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f4f4f4;
+      }
+      nav {
+        background: #2c3e50;
+        padding: 1rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      nav a {
+        color: white;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+      .container {
+        padding: 2rem;
+        max-width: 900px;
+        margin: auto;
+      }
+      .product-detail {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        gap: 30px;
+        padding: 25px;
+      }
+      .product-detail img {
+        width: 350px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+      }
+      .product-info {
+        flex: 1;
+      }
+      .product-info h1 {
+        margin-top: 0;
+        color: #2c3e50;
+      }
+      .product-info .warung {
+        color: #7f8c8d;
+        margin-bottom: 10px;
+      }
+      .product-info .price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #27ae60;
+        margin: 15px 0;
+      }
+      .product-info .stock {
+        color: #555;
+        margin-bottom: 15px;
+      }
+      .product-info .desc {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .buy-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .buy-form input[type="number"] {
+        width: 70px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+      .btn-buy {
+        padding: 10px 25px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-buy:hover {
+        background: #2980b9;
+      }
+      .btn-back {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #3498db;
+        text-decoration: none;
+      }
+      .btn-back:hover {
+        text-decoration: underline;
+      }
+      .login-msg {
+        margin-top: 15px;
+        padding: 12px;
+        background: #ffeaa7;
+        border-radius: 4px;
+        color: #333;
+      }
+      .login-msg a {
+        color: #2980b9;
+        font-weight: bold;
+      }
+      .btn-wishlist {
+        padding: 10px 20px;
+        border: 2px solid #e74c3c;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: white;
+        color: #e74c3c;
+      }
+      .btn-wishlist:hover {
+        background: #e74c3c;
+        color: white;
+      }
+      .btn-wishlist.active {
+        background: #e74c3c;
+        color: white;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        background: #333;
+        color: white;
+        margin-top: 30px;
+      }
+      @media (max-width: 600px) {
+        .product-detail {
+          flex-direction: column;
+        }
+        .product-detail img {
+          width: 100%;
+          height: 220px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div><strong>UMKM Online</strong></div>
+      <div>
+        <a href="/">Beranda</a>
+        {% if session.get('role') == 'buyer' %}
+        <a href="/cart">🛒 Keranjang</a>
+        <a href="/wishlist">❤ Wishlist</a>
+        {% endif %}
+        <a href="/about-us">Tentang Kami</a>
+        <a href="/contact-us">Kontak</a>
+        {% if session.get('user_id') %}
+        <a href="/dashboard/{{ session.role }}">Dashboard</a>
+        <a href="/logout">Logout</a>
+        {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Daftar</a>
+        {% endif %}
+      </div>
+    </nav>
+    <div class="container">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <ul style="color: green">
+        {% for msg in messages %}
+        <li>{{ msg }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% endwith %}
+
+      <a href="/" class="btn-back">&larr; Kembali ke Beranda</a>
+
+      <div class="product-detail">
+        {% if product.image_path %}
+        <img
+          src="/static/uploads/{{ product.image_path }}"
+          alt="{{ product.name }}"
+        />
+        {% endif %}
+        <div class="product-info">
+          <h1>{{ product.name }}</h1>
+          <p class="warung">Warung: {{ product.warung_name }}</p>
+          <p class="price">Rp {{ "%.2f"|format(product.price) }}</p>
+          <p class="stock">Stok tersedia: {{ product.stock }}</p>
+          {% if product.description %}
+          <p class="desc">{{ product.description }}</p>
+          {% endif %} {% if product.stock > 0 %} {% if session.get('role') ==
+          'buyer' %}
+          <form
+            action="/cart/add/{{ product.id }}"
+            method="POST"
+            class="buy-form"
+          >
+            <label>Jumlah:</label>
+            <input
+              type="number"
+              name="quantity"
+              value="1"
+              min="1"
+              max="{{ product.stock }}"
+              required
+            />
+            <button type="submit" class="btn-buy">Tambah ke Keranjang</button>
+          </form>
+          <div class="action-buttons">
+            <form action="/wishlist/toggle/{{ product.id }}" method="POST">
+              <button
+                type="submit"
+                class="btn-wishlist {{ 'active' if in_wishlist else '' }}"
+              >
+                {{ '❤ Hapus dari Wishlist' if in_wishlist else '🤍 Tambah ke
+                Wishlist' }}
+              </button>
+            </form>
+          </div>
+          {% elif not session.get('user_id') %}
+          <div class="login-msg">
+            Silakan <a href="/login">login</a> atau
+            <a href="/register">daftar</a> untuk membeli produk ini.
+          </div>
+          {% endif %} {% else %}
+          <p style="color: red; font-weight: bold">Stok habis</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <p>&copy; 2026 UMKM Online. All rights reserved.</p>
+    </div>
+  </body>
+</html>

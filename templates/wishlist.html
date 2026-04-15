@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f4f4f4;
+      }
+      nav {
+        background: #2c3e50;
+        padding: 1rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      nav a {
+        color: white;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+      .container {
+        padding: 2rem;
+        max-width: 1000px;
+        margin: auto;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+      }
+      .card img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+      }
+      .card-body {
+        padding: 12px;
+      }
+      .card-body h3 {
+        margin: 0 0 5px;
+        font-size: 1rem;
+        color: #2c3e50;
+      }
+      .card-body .price {
+        color: #27ae60;
+        font-weight: bold;
+        margin: 5px 0;
+      }
+      .card-body .warung {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+      }
+      .card-link {
+        text-decoration: none;
+        color: inherit;
+      }
+      .btn-remove {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        margin-top: 8px;
+      }
+      .btn-remove:hover {
+        background: #c0392b;
+      }
+      .empty-msg {
+        text-align: center;
+        padding: 40px;
+        color: #777;
+      }
+      .btn-back {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #3498db;
+        text-decoration: none;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        background: #333;
+        color: white;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div><strong>UMKM Online</strong></div>
+      <div>
+        <a href="/">Beranda</a>
+        {% if session.get('role') == 'buyer' %}
+        <a href="/cart">🛒 Keranjang</a>
+        <a href="/wishlist">❤ Wishlist</a>
+        {% endif %}
+        <a href="/about-us">Tentang Kami</a>
+        <a href="/contact-us">Kontak</a>
+        <a href="/dashboard/{{ session.role }}">Dashboard</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </nav>
+    <div class="container">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <ul style="color: green">
+        {% for msg in messages %}
+        <li>{{ msg }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% endwith %}
+
+      <a href="/" class="btn-back">&larr; Kembali ke Beranda</a>
+      <h2>❤ Wishlist Saya</h2>
+
+      {% if items %}
+      <div class="grid">
+        {% for w in items %}
+        <div class="card">
+          <a href="/product/{{ w.product.id }}" class="card-link">
+            {% if w.product.image_path %}
+            <img
+              src="/static/uploads/{{ w.product.image_path }}"
+              alt="{{ w.product.name }}"
+            />
+            {% endif %}
+            <div class="card-body">
+              <h3>{{ w.product.name }}</h3>
+              <p class="warung">{{ w.product.warung_name }}</p>
+              <p class="price">Rp {{ "%.2f"|format(w.product.price) }}</p>
+            </div>
+          </a>
+          <div style="padding: 0 12px 12px">
+            <form action="/wishlist/toggle/{{ w.product.id }}" method="POST">
+              <button type="submit" class="btn-remove">
+                Hapus dari Wishlist
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-msg">
+        <p>Wishlist Anda kosong.</p>
+        <a href="/" class="btn-back">Jelajahi produk →</a>
+      </div>
+      {% endif %}
+    </div>
+    <div class="footer">
+      <p>&copy; 2026 UMKM Online. All rights reserved.</p>
+    </div>
+  </body>
+</html>
